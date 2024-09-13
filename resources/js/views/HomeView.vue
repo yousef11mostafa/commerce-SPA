@@ -18,11 +18,21 @@ const cart = ref([]);
 const addtocard = (product) => {
     store.commit("payments/addToCart", product);
 };
+
+
+
+const user=computed(()=>store.state.auth.user);
+const roles=computed(()=>store.state.auth.roles);
+
+
 </script>
 
 <template>
     <layout>
         <div class="row mt-5">
+            {{ user }}
+            <br>
+            {{ roles }}
             <div
                 v-for="product in products"
                 :key="product.id"

@@ -14,6 +14,7 @@
     "dependencies": {
         "@stripe/stripe-js": "^4.4.0",
         "bootstrap": "^5.3.3",
+        "element-plus": "^2.8.2",
         "vue-router": "^4.4.3",
         "vue-spinners": "^1.0.2",
         "vuex": "^4.0.2"

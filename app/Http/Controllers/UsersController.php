@@ -4,16 +4,17 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\Product;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
+
+use App\Traits\ApiResponse;
 
 class UsersController extends Controller
 {
     //
+    use ApiResponse;
     public function index(Request $request){
-
-
-
 
 
         $user = User::firstOrCreate(
@@ -32,7 +33,7 @@ class UsersController extends Controller
 
         try {
             //create new customer on stripe dashboard or if exists get him
-    
+
             $user->createOrGetStripeCustomer();
 
             $payment = $user->charge(
@@ -54,6 +55,13 @@ class UsersController extends Controller
                 ]);
 
             foreach (json_decode($request->input('cart'), true) as $item) {
+
+                // start increase the product numbber of selling
+                $product = Product::find($item['id']);
+                $product->number_of_selling += $item['quantity'];
+                $product->save();
+                // end
+                
                 $order->products()
                     ->attach($item['id'], ['quantity' => $item['quantity']]);
             }
@@ -61,12 +69,48 @@ class UsersController extends Controller
             $order->load('products');
             return $order;
 
-            // return response()->json("hellow");
+
 
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
     }
+
+
+    public function users() {
+        // View all users
+        return User::withCount('orders')->paginate(10);
+    }
+
+
+
+
+    public function update(Request $request, $user) {
+        // Edit user details
+        $user=User::find($user);
+        $validData=$request->validate([
+            'name'=>'required',
+        ]);
+
+        $user->name=$request->input('name');
+        $user->save();
+
+        return $this->successResponse(message:"user updated successfully");
+
+    }
+
+
+    public function destroy($user) {
+        // Delete a user
+        $user=User::find($user);
+        $user->orders()->delete();
+        $user->products()->delete();
+        $user->delete();
+        return $this->successResponse(message:"user deleted successfully");
+    }
+
+
+
 
 }
 

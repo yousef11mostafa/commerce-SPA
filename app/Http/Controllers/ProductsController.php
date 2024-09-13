@@ -18,4 +18,6 @@ class ProductsController extends Controller
         $product=Product::with("categories:id,name,slug")->where('slug',$slug)->get();
         return response()->json($product);
     }
+
+
 }
